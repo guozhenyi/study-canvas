@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>使用 canvas 绘制简单表格</title>
+  <style>
+    html, body {
+      margin: 0;
+    }
+    html {
+      font-size: 14px;
+    }
+    .wrap {
+      padding: 10px;
+      width: 100vw;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+    .title {
+      margin: 0;
+      font-size: 18px;
+      line-height: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="wrap">
+    <h1 class="title">1. 使用 canvas 绘制简单表格</h1>
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <script>
+    const data = [
+      { a: 1, b: 2, c: 3, d: 4 },
+      { a: 5, b: 6, c: 7, d: 8 },
+      { a: 11, b: 12, c: 13, d: 14 },
+      { a: 21, b: 22, c: 23, d: 24 },
+    ]
+
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    canvas.width = 800;
+    canvas.height = 300;
+    // canvas.style.border = '1px solid #f00';
+
+    const rectW = 96; // 矩形宽度
+    const rectH = 20; // 矩形高度
+
+    context.scale(2, 2); // scale(x, y) 水平方向缩放，垂直方向缩放 （这里相当于放大了一倍）
+    context.font = '12px sans-serif'; // 字体设置。默认值 10px sans-serif。
+    context.lineWidth = 1; // 线的宽度 默认 1.0
+    context.strokeStyle = '#ccc'; // 图形边线的颜色和样式 默认 #000
+    context.textAlign = 'center'; // 文本对齐设置 start (默认), end, left, right 或 center
+
+    // 绘制表头
+    context.fillStyle = '#000'; // 图形内部的颜色和样式。默认 #000
+    context.fillText('姓名', 48, 15); // 在 (x,y) 位置绘制（填充）文本。
+    context.fillStyle = '#ff0000';
+    context.fillText('学号', 144, 15);
+    context.fillStyle = '#006fff';
+    context.fillText('科目', 240, 15);
+    context.fillStyle = '#07c160';
+    context.fillText('分数', 336, 15);
+
+    // 绘制数据
+    for (const [idx, item] of data.entries()) {
+      context.fillStyle = '#000000';
+      context.fillText(item.a, 48, 20 * idx + 35);
+      context.fillStyle = '#ff0000';
+      context.fillText(item.b, 144, 20 * idx + 35);
+      context.fillStyle = '#006fff';
+      context.fillText(item.c, 240, 20 * idx + 35);
+      context.fillStyle = '#07c160';
+      context.fillText(item.d, 336, 20 * idx + 35);
+    }
+
+    // 横线
+    for (let idx = 0; idx < data.length + 2; idx++) {
+      context.moveTo(0, 20 * idx);
+      context.lineTo(96 * 4, 20 * idx);
+    }
+
+    // 竖线
+    for (let idx = 0; idx < 5; idx++) {
+      context.moveTo(96 * idx, 0);
+      context.lineTo(96 * idx, 20 * 5);
+    }
+
+    context.stroke();
+
+  </script>
+</body>
+</html>
