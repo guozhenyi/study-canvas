@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>实现上下左右移动</title>
+  <style>
+    html, body {
+      margin: 0;
+    }
+    html {
+      font-size: 14px;
+    }
+    .wrap {
+      padding: 10px;
+      width: 100vw;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+    .title {
+      margin: 0;
+      font-size: 18px;
+      line-height: 2em;
+    }
+    .btn-box {
+      padding: 5px;
+      width: 1248px;
+      text-align: center;
+      background-color: #eee;
+    }
+    .btn-line {
+      padding: 5px 0;
+      text-align: center;
+    }
+
+    .btn, .el-checkbox {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    .btn {
+      display: inline-block;
+      line-height: 1;
+      white-space: nowrap;
+      cursor: pointer;
+      background: #FFF;
+      border: 1px solid #DCDFE6;
+      color: #606266;
+      -webkit-appearance: none;
+      text-align: center;
+      box-sizing: border-box;
+      outline: 0;
+      margin: 0;
+      transition: .1s;
+      font-weight: 500;
+      padding: 12px 20px;
+      font-size: 14px;
+      border-radius: 4px;
+    }
+    .btn--primary {
+      color: #FFF;
+      background-color: #409EFF;
+      border-color: #409EFF;
+    }
+    .btn--mini, .btn--small {
+      font-size: 12px;
+      border-radius: 3px;
+    }
+    .btn--mini, .btn--mini.is-round {
+      padding: 7px 15px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="wrap">
+    <h1 class="title">3. 实现上下左右移动</h1>
+    <canvas id="canvas"></canvas>
+    <div class="btn-box">
+      <div class="btn-line">
+        <button class="btn btn--primary btn--mini" id="up_btn">上移</button>
+      </div>
+      <div class="btn-line">
+        <button class="btn btn--primary btn--mini" id="left_btn">左移</button>
+        <button class="btn btn--primary btn--mini" id="right_btn">右移</button>
+      </div>
+      <div class="btn-line">
+        <button class="btn btn--primary btn--mini" id="down_btn">下移</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- <script src="https://cdn.jsdelivr.net/npm/fabric@5.2.1/dist/fabric.min.js"></script> -->
+  <script>
+
+    const cols = [
+      {field: 'a', label: '结构', color: '#000'},
+      {field: 'b', label: '数量', color: '#ff0000'},
+      {field: 'c', label: '户型', color: '#006fff'},
+      {field: 'd', label: '建筑面积(㎡)', color: '#07c160'},
+    ];
+
+    const data = [
+      {a: 1, b: 2, c: 3, d: 4},
+      {a: 5, b: 6, c: 7, d: 8},
+      {a: 11, b: 12, c: 13, d: 14},
+      {a: 21, b: 22, c: 23, d: 24},
+      {a: 31, b: 32, c: 33, d: 34},
+      {a: 41, b: 42, c: 43, d: 44},
+      {a: 51, b: 52, c: 53, d: 54},
+      {a: 61, b: 62, c: 63, d: 64},
+      {a: 71, b: 72, c: 73, d: 74},
+      {a: 81, b: 82, c: 83, d: 84},
+      {a: 91, b: 92, c: 93, d: 94},
+      {a: 101, b: 102, c: 103, d: 104},
+      {a: 111, b: 112, c: 113, d: 114},
+      {a: 121, b: 122, c: 123, d: 124},
+      {a: 131, b: 132, c: 133, d: 134},
+    ];
+
+    const point = { x: 0, y: 0 }; // 坐标原点
+
+    const rectW = 96;
+    const rectH = 20;
+
+    function painted() {
+      const canvas = document.getElementById('canvas');
+      const context = canvas.getContext('2d');
+      canvas.width = 1248;
+      canvas.height = 500;
+      canvas.style.border = '1px solid #f00';
+
+      const fontSize = 12; // 字体大小
+
+      context.scale(2, 2); // scale(x, y) 水平方向缩放，垂直方向缩放
+      context.font = fontSize + 'px sans-serif'; // 字体设置。默认值 10px sans-serif。
+      context.lineWidth = 1; // 线的宽度 默认 1.0
+      context.strokeStyle = '#ccc'; // 图形边线的颜色和样式 默认 #000
+      context.textAlign = 'center'; // 文本对齐设置 start (默认), end, left, right 或 center
+
+      const stPoint = {
+        x: point.x + rectW / 2, // x轴起始位置，文本居中，则为宽度一半
+        y: point.y + (rectH + fontSize) / 2 - 1, // y轴起始位置
+      }
+
+      // let sx = rectW / 2; // x轴起始位置，文本居中，则为宽度一半
+      // let sy = (rectH + fontSize) / 2 - 1; // y轴起始位置
+
+      // 绘制表头
+      for (const [idx, col] of cols.entries()) {
+        context.fillStyle = col.color; // 图形内部的颜色和样式。默认 #000
+        context.fillText(col.label, rectW * idx + stPoint.x, stPoint.y); // 在 (x,y) 位置绘制（填充）文本。
+      }
+
+      // 绘制数据
+      for (const [idx, item] of data.entries()) {
+        let row_y = rectH * idx + (20 + stPoint.y);
+        for (const [cdx, col] of cols.entries()) {
+          context.fillStyle = col.color;
+          context.fillText(item[col.field], rectW * cdx + stPoint.x, row_y);
+        }
+      }
+
+      // 绘制网格线
+      let x = parseInt(canvas.width / rectW);
+      let y = parseInt(canvas.height / rectH);
+      const max_x = (canvas.width % rectW === 0) ? x : (x + 1);
+      const max_y = (canvas.height % rectH === 0) ? y : (y + 1);
+      for (let idx = 1; idx < max_y; idx++) {
+        context.moveTo(0, rectH * idx);
+        context.lineTo(canvas.width, rectH * idx);
+        context.stroke()
+      }
+      for (let idx = 1; idx < max_x; idx++) {
+        context.moveTo(rectW * idx, 0);
+        context.lineTo(rectW * idx, canvas.height);
+        context.stroke()
+      }
+    }
+
+    painted();
+
+    const btnLeft = document.getElementById('left_btn');
+    const btnRight = document.getElementById('right_btn');
+    btnLeft.addEventListener('click', function() {
+      point.x -= rectW;
+      painted();
+    });
+    btnRight.addEventListener('click', function() {
+      point.x += rectW;
+      painted();
+    });
+
+    const btnUp = document.getElementById('up_btn');
+    const btnDown = document.getElementById('down_btn');
+    btnUp.addEventListener('click', function() {
+      point.y -= rectH;
+      painted();
+    });
+    btnDown.addEventListener('click', function() {
+      point.y += rectH;
+      painted();
+    });
+
+  </script>
+</body>
+</html>
